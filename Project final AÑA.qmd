@@ -1,0 +1,988 @@
+---
+title: "Análisis Estadístico del Conocimiento, Uso y Percepción de la Criptomoneda Pi Network entre Estudiantes Universitarios"
+author:
+  - Alvaro Lira
+editor: visual
+date: "`r format(Sys.time(), '%d %B %Y')`"
+format: 
+  html:
+    number-sections: true
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    embed-resources: true
+---
+
+# Introducción
+
+## Relevancia
+
+El estudio del conocimiento, uso y percepción de la criptomoneda Pi Network entre estudiantes universitarios es relevante debido al creciente interés en las nuevas tecnologías financieras descentralizadas. Los jóvenes, especialmente los estudiantes universitarios, representan un grupo demográfico clave para la adopción temprana de innovaciones digitales como las criptomonedas. Comprender su nivel de conocimiento, frecuencia de uso y percepciones frente a las criptomonedas como Pi Network permite identificar barreras de adopción, oportunidades educativas y posibles tendencias en la economía digital.
+
+## Planificación
+
+```{r}
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("lubridate")
+
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+```
+
+## Contexto
+
+Pi Network es una plataforma de criptomoneda centrada en la minería móvil, desarrollada por Nicolas Kokkalis, Chengdiao Fan y Vince McPhillip, todos ellos egresados de la Universidad de Stanford. En la actualidad, esta criptomoneda ocupa el puesto número 26 entre las criptomonedas activas listadas en CoinMarketCap según su capitalización de mercado.El principal objetivo de Pi Network es formar una comunidad global de "pioneros" que participen activamente en el fortalecimiento de la red y en el desarrollo continuo de la plataforma.
+
+## Objetivo General
+
+Analizar mediante herramientas estadísticas el comportamiento, percepción, conocimiento y adopción de la criptomoneda Pi Network en estudiantes universitarios, integrando variables cualitativas y cuantitativas que permitan aplicar distribuciones de probabilidad, pruebas de hipótesis y análisis de regresión.
+
+## Objetivos Específicos
+
+-   Estimar el porcentaje de estudiantes que han minado Pi Network, otras criptomonedas gratuitas y de pago ,segmentándolos por su tipo de carrera ,departamento de procedencia y nivel de educación financiera .
+
+-   Analizar el promedio de gasto mensual desde la billetera digital (Yape, Plin u otro) y efectivo de los estudiantes universitarios comparandolo con su adopción por las criptomonedas, segmentando los resultados por escala socioeconómica.
+
+# Datos
+
+## Población objetivo
+
+Población de estudio: estudiantes de la Universidad de Ingeniería y Tecnología (UTEC).
+
+Unidades muestrales: estudiantes individuales de UTEC que respondieron voluntariamente al cuestionario distribuido a través de Google Forms. Cada respuesta representa una unidad de análisis para el estudio.
+
+## Tipo de muestreo
+
+El tipo de muestreo utilizado es muestreo no probabilístico por conveniencia. Esto significa que los estudiantes fueron seleccionados principalmente por la facilidad de acceso, ya que el cuestionario fue distribuido mediante Google Forms.
+
+## Recolección de datos
+
+Para el instrumento de recolección usaremos archivos csv obtenidos mediante la toma de datos hecho en un Google forms, fuente primaria de información.
+
+## Variables
+
+Un resumen de las variables que escogimos para nuestro estudio.
+
+| **Variable**                  | **Tipo**              |
+|:------------------------------|:----------------------|
+| carrera                       | Cualitativa nominal   |
+| departamento                  | Cualitativa nominal   |
+| participacion_cripto          | Cualitativa nominal   |
+| intencion_cripto              | Cualitativa nominal   |
+| Nivel_socieconomico           | Cualitativa ordinal   |
+| frecuencia_uso_billeterasV    | Cualitativa ordinal   |
+| educacion_financiera          | Cualitativa ordinal   |
+| frecuencia_minado_dias_semana | Cuantitativa discreta |
+| cant_funciones_B.Virtual      | Cuantitativa discreta |
+| GastoM_efectivo               | Cuantitativa continua |
+| GastoM_B.digital              | Cuantitativa continua |
+
+### Cualitativas nominales
+
+-   **carrera**: Campo académico al que corresponde la carrera universitaria del estudiante.
+-   **departamento**: Departamento de nacimiento.
+-   **participacion_cripto**: Indica si el estudiante ha usado hasta el momento una criptomoneda de pago, la criptomoneda Pi Network, una gratuita o no ha invertido en absoluto.
+-   **intencion_cripto**: Preferencia de uso o no uso de criptomonedas ante una oportunidad de inversión.
+
+### Cualitativas ordinales
+
+-   **Nivel_socieconomico**: Ingreso familiar promedio declarado y gasto mensual clasificada en una escala del A a la E.
+-   **frecuencia_uso_billeterasV**: Frecuencia de uso de billeteras virtuales como Yape, Plin, entre otras.
+-   **educacion_financiera** : Autoevaluación del nivel de conocimientos financieros en una escala del 1 al 5.
+
+### Cuantitativas discretas
+
+-   **frecuencia_minado_dias_semana** :Número de días por semana dedicado al minado en PI Network.
+-   **cant_funciones_B.Virtual** :Número de funcionalidades de apps de billeteras virtuales que utiliza.
+
+### Cuantitativas continuas
+
+-   **GastoM_efectivo** :Gasto promedio mensual en efectivo(en soles).
+-   **GastoM_B.digital** :Gasto promedio mensual utilizando billeteras digitales(en soles).
+
+## Limpieza de datos
+
+Procedemos a cargar la base de datos y lo asignamos a la variable `bd`.Este es la fuente primaria original.
+
+```{r}
+install.packages("stringr")
+install.packages("tidyr")
+
+library(readr)
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+# Cargar la base de datos y lo asignamos a la variable bd.
+bd <- read_csv("Analisis EyP.csv")
+```
+
+Un resumen de la base de datos original.
+
+```{r,echo=FALSE}
+# Número total de variables. 
+cat("La base de datos original tiene ", ncol(bd), " variables. \n")
+# Número de unidades muestrales. 
+cat("La base de datos original tiene ", nrow(bd), " unidades muestrales. \n")
+
+# Cantidad de datos faltantes. 
+datos_faltantes=sum(is.na(bd))
+cat("La base de datos original tiene ", datos_faltantes, " datos faltantes.\n")
+
+cat("Los nombres de las variables de la base de datos original bd son los siguientes: \n")
+names(bd)
+```
+
+Para nuestro estudio, seleccionamos las variables que necesitamos y eliminamos las que no proporcionan información relevante.Eliminamos la dos primeras columnas que corresponden a la Marca Temporal y el grupo que encuestó nombradas `.` y `¿Qué grupo lo está encuestando?` respectivamente.Además,seleccionamos las variables relevantes para nuestro estudio indicado en la clasificación de las variables y lo asignamos a un nuevo base de datos denominada `bdf`.En total, son 11 variables y las renombramos para una mejor comprensión.
+
+```{r}
+bd <- bd %>% select(-1,-2)
+# Otra forma de realizarlo: bd <- bd %>% select(-.,-`¿Qué grupo lo está encuestando?`)
+
+# Seleccionamos las variables relevantes para nuestro estudio indicado en la clasificación de las variables y lo asignamos al dataframe bdf.
+bdf <- bd %>% select(1:3,8,13,15,17,24,25,27,28)
+
+#Renombrando las variables.
+bdf=bdf %>% rename(carrera=`¿A que área pertenece tu carrera universitaria?`, departamento=`¿En qué departamento del Perú naciste?`, Nivel_socieconomico=`Selecciona tu nivel socioeconómico`, participacion_cripto=`Marca las opciones que más te representen:` , intencion_cripto=`Si tuvieras que elegir entre invertir en una criptomoneda conocida (como Bitcoin) o una nueva como Pi Network, ¿Cuál preferirías?` ,frecuencia_minado_dias_semana=`¿Cuántos días a la semana le dedicas al minado de Pi Network?` , educacion_financiera=`¿Cómo calificarías tu nivel de educación financiera`, frecuencia_uso_billeterasV=`¿Con qué frecuencia realizas transacciones con billeteras digitales como Yape o Plin?`, GastoM_B.digital=`¿Cuál es tu promedio mensual de dinero gastado solo desde tu billetera digital (Yape, Plin, etc)? (Numero en Soles) Ej: 300` ,GastoM_efectivo=`¿Cuál es tu promedio mensual de dinero gastado solo en efectivo? (Numero en Soles) Ej: 300`,cant_funciones_B.Virtual=`Cuantas funciones crees que usas en las apps de billeteras digitales. (Ejemplo: 2)`)
+
+```
+
+```{r,echo=FALSE}
+cat("Los nombres de las variables del dataframe bdf son los siguientes: \n")
+names(bdf)
+
+```
+
+Un resumen de la base de datos final denominada `bdf`.
+
+```{r,echo=FALSE}
+
+cat("Resumen del dataframe bdf: \n")
+# Resumen de las variables del dataframe bdf.
+str(bdf)
+
+#Número de variables. 
+cat("Número de variables en el dataframe bdf: ",ncol(bdf),"\n")
+
+#Número de unidades muestrales.
+cat("Número de unidades muestrales en el dataframe bdf: ",nrow(bdf),"\n")
+
+cat("Tamaño efectivo de cada variable:\n")
+colSums(!is.na(bdf))
+
+cat("La base de datos tiene ", sum(is.na(bdf)), " datos faltantes.\n")
+```
+
+**Limpieza de la variable carrera**
+
+El formulario presento la elección de carreras de la siguiente manera: ![Formulario](Captura%20de%20pantalla%20(1263).png).
+
+Observamos 7 categorías.
+
+```{r}
+class(bdf$carrera)
+#Vemos que valores hay en esta variable
+unique(bdf$carrera)
+length(unique(bdf$carrera))
+
+bdf <- bdf %>%
+  mutate(carrera = factor(case_when(
+    carrera %in% c("Ingenierías", 
+                   "Ciencias Sociales", 
+                   "Artes y humanidades", 
+                   "Económicas", 
+                   "Ciencias de la salud", 
+                   "Administrativas") ~ carrera,
+    TRUE ~ "Otra"
+  ), levels = c("Ingenierías",
+                "Ciencias Sociales",
+                "Artes y humanidades",
+                "Económicas",
+                "Ciencias de la salud",
+                "Administrativas",
+                "Otra")))
+
+carreras <- bdf %>%
+  group_by(carrera) %>%
+  summarize(n = n())
+
+carreras
+
+```
+
+**Limpieza de la variable departamento**
+
+```{r}
+class(bdf$departamento)
+unique(bdf$departamento)
+length(unique(bdf$departamento))
+#Aqui notamos que hay 24 datos unicos 
+
+
+```
+
+**Limpieza de la variable Nivel_socieconomico**
+
+```{r}
+class(bdf$Nivel_socieconomico)
+unique(bdf$Nivel_socieconomico)
+length(unique(bdf$Nivel_socieconomico))
+#Aqui notamos que hay 5 datos unicos 
+bdf$Nivel_socieconomico=factor(bdf$Nivel_socieconomico,levels = c("Bajo (NSE E)","Medio - Bajo (NSE D)","Medio (NSE C)","Medio- Alto (NSE B)","Alto (NSE A)"),ordered = TRUE)
+
+unique(bdf$Nivel_socieconomico)
+```
+
+**Limpieza de la variable participacion_cripto**
+
+El formulario presento múltiple opciones para la variable participacion_cripto de la siguiente manera: ![Formulario](Captura%20de%20pantalla%20(1264).png)
+
+```{r}
+class(bdf$participacion_cripto)
+unique(bdf$participacion_cripto)
+length(unique(bdf$participacion_cripto))
+
+#data <- bdf %>%separate(participacion_cripto, into = c("opcion1", "opcion2", "opcion3","opcion4"), sep = ",")
+#hay cadenas invisibles
+
+bdf <- bdf %>%
+  mutate(
+    opcion1 = if_else(str_detect(participacion_cripto, fixed("No he minado o invertido")), TRUE, FALSE),
+    opcion2 = if_else(str_detect(participacion_cripto, fixed("He minado en otras criptomonedas GRATIS")), TRUE, FALSE),
+    opcion3 = if_else(str_detect(participacion_cripto, fixed("He minado específicamente Pi Network (GRATIS)")), TRUE, FALSE),
+    opcion4 = if_else(str_detect(participacion_cripto, fixed("He invertido en criptomonedas de PAGO")), TRUE, FALSE )
+  )
+opciones_seleccionadas <- colSums(bdf[, 12:15])
+opciones_seleccionadas
+```
+
+**Limpieza de la variable intencion_cripto**
+
+```{r}
+class(bdf$intencion_cripto)
+length(unique(bdf$intencion_cripto))
+unique(bdf$intencion_cripto)
+
+
+
+```
+
+**Limpieza de la variable frecuencia_minado_dias_semana**
+
+```{r}
+class(bdf$frecuencia_minado_dias_semana)
+unique(bdf$frecuencia_minado_dias_semana)
+length(unique(bdf$frecuencia_minado_dias_semana))
+bdf$frecuencia_minado_dias_semana <- as.numeric(bdf$frecuencia_minado_dias_semana)
+
+```
+
+**Limpieza de la variable educacion_financiera**
+
+```{r}
+class(bdf$educacion_financiera)
+unique(bdf$educacion_financiera)
+length(unique(bdf$educacion_financiera))
+bdf$educacion_financiera=factor(bdf$educacion_financiera,levels = c(1,2,3,4,5),ordered = TRUE)
+unique(bdf$educacion_financiera)
+
+```
+
+**Limpieza de la variable frecuencia_uso_billeterasV**
+
+```{r}
+class(bdf$frecuencia_uso_billeterasV)
+unique(bdf$frecuencia_uso_billeterasV)
+length(unique(bdf$frecuencia_uso_billeterasV))
+bdf$frecuencia_uso_billeterasV=factor(bdf$frecuencia_uso_billeterasV,levels=c("Nunca","Menos de una vez a la semana","Una vez a la semana","Varias veces por semana","Diariamente"),ordered = TRUE )
+unique(bdf$frecuencia_uso_billeterasV)
+```
+
+**Limpieza de la variable cant_funciones_B.Virtual**
+
+```{r}
+class(bdf$cant_funciones_B.Virtual)
+length(unique(bdf$cant_funciones_B.Virtual))
+unique(bdf$cant_funciones_B.Virtual)
+
+bdf$cant_funciones_B.Virtual=as.numeric(bdf$cant_funciones_B.Virtual)
+table(bdf$cant_funciones_B.Virtual,useNA = "always")
+bdf$cant_funciones_B.Virtual[bdf$cant_funciones_B.Virtual>=17] <- NA
+
+
+```
+
+**Limpieza de la variable GastoM_B.digital**
+
+```{r}
+class(bdf$GastoM_B.digital)
+length(unique(bdf$GastoM_B.digital))
+bdf$GastoM_B.digital=as.numeric(bdf$GastoM_B.digital)
+
+sort(unique(bdf$GastoM_B.digital),decreasing = T)
+
+```
+
+**Limpieza de la variable GastoM_efectivo**
+
+```{r}
+class(bdf$GastoM_efectivo)
+length(unique(bdf$GastoM_efectivo))
+bdf$GastoM_efectivo=as.numeric(bdf$GastoM_efectivo)
+
+sort(unique(bdf$GastoM_efectivo),decreasing = T)
+
+
+```
+
+# Análisis descriptivo
+
+## Análisis univariado
+
+### Variables Cualitativas
+
+*Participacion_cripto*
+
+```{r}
+
+bar_cript<- barplot(opciones_seleccionadas, 
+        main = "Participacion de estudiantes en el uso de criptomonedas", 
+        xlab = "Opciones", 
+        ylab = "Frecuencia", 
+        col = c("#08519c", "#3182bd", "#9ecae1", "#deebf7"), 
+        names.arg = c("Opcion1", 
+                      "Opcion2", 
+                      "Opcion3", 
+                      "Opcion4"),
+        ylim = c(0, 800))  
+
+# Añadir las frecuencias en cada barra
+text(x = bar_cript, 
+     y = opciones_seleccionadas+2, 
+     labels = opciones_seleccionadas, 
+     pos = 3,
+     col = "black",offset = 0.5)
+# Agregar la leyenda
+legend("topright",                  
+       legend = c("Opcion1:No he minado o invertido", 
+                      "Opcion2:He minado en otras criptomonedas GRATIS", 
+                      "Opcion3:He minado específicamente Pi Network (GRATIS)", 
+                      "Opcion4:He invertido en criptomonedas de PAGO"), 
+       fill =  c("#08519c", "#3182bd", "#9ecae1", "#deebf7"),             
+       title = "Categorías",cex=0.6) 
+
+
+
+
+```
+
+De este gráfico, observamos que la mayoría de encuestados `No ha minado o invertido en criptomonedas`.
+
+*carrera*
+
+Tenemos 7 categorías.
+
+```{r}
+freq_carrera <- table(bdf$carrera)
+# Definir colores
+colores <- c("#08519c", "#deebf7", "#deebf7", "#deebf7", "#3182bd", "#9ecae1", "#9ecae1")
+
+bar_part <- barplot(freq_carrera, 
+                   names.arg = FALSE,
+                   main = "Gráfico de la elección de carreras de los estudiantes", 
+                   col = colores, 
+                   ylim = c(0, max(freq_carrera) + 100) 
+                   )
+text(x = bar_part,
+     y = par("usr")[3] - 20,  # Debajo del eje X
+     labels = names(freq_carrera),
+     srt = 45,
+     adj = 1,
+     xpd = TRUE,
+     cex = 0.7)
+
+
+# Añadir las frecuencias sobre las barras
+text(x = bar_part, 
+     y = freq_carrera + 5, 
+     labels = freq_carrera, 
+     pos = 3, 
+     cex = 0.8, 
+     col = "black")
+
+```
+
+En este gráfico, observamos que la mayoría de encuestados estudian `Ingenierías`.
+
+*Departamento*
+
+```{r}
+freq_departamentos <- table(bdf$departamento)
+# Definir colores
+colores <- c("skyblue", "orange", "green", "yellow", "lightblue", "tomato", "limegreen")
+
+bar_pos <- barplot(freq_departamentos, 
+                   names.arg = FALSE,
+                   main = "Gráfico de los departamentos de nacimiento de los encuestados", 
+                   col = colores, 
+                   ylim = c(0, max(freq_departamentos) + 100), 
+                   las = 2,               
+                   cex.names = 0.7)
+text(x = bar_pos,
+     y = par("usr")[3] - 20,  # Debajo del eje X
+     labels = names(freq_departamentos),
+     srt = 45,
+     adj = 1,
+     xpd = TRUE,
+     cex = 0.7)
+
+
+# Añadir las frecuencias sobre las barras
+text(x = bar_pos, 
+     y = freq_departamentos + 5, 
+     labels = freq_departamentos, 
+     pos = 3, 
+     cex = 0.8, 
+     col = "black")
+```
+
+De este gráfico,notamos que la mayoría ha nacido en `Lima`.
+
+*Nivel de educacion financiera*
+
+```{r}
+freq_educ <- table(bdf$educacion_financiera)
+# Definir colores
+colores <- c("#deebf7", "#9ecae1", "#08519c", "#3182bd",  "#deebf7")
+
+bar_educ <- barplot(freq_educ, 
+                   names.arg = names(freq_educ),
+                   main = "Gráfico del nivel de educacion financiera", 
+                   col = colores, 
+                   ylim = c(0, max(freq_educ) + 100),
+                   xlab="Nivel de educacion financiera",ylab="Frecuencia"
+                   )
+
+# Añadir las frecuencias sobre las barras
+text(x = bar_educ, 
+     y = freq_educ+ 5, 
+     labels = freq_educ, 
+     pos = 3, 
+     cex = 0.8, 
+     col = "black")
+```
+
+De este gráfico,la mayoría considera que tiene un `nivel de educación financiera promedio(3)`.
+
+*Escala socioeconomica*
+
+```{r}
+freq_econ <- table(bdf$Nivel_socieconomico)
+# Definir colores
+colores <- c("#deebf7", "skyblue", "#3182bd", "#08519c",  "#9ecae1")
+
+bar_econ <- barplot(freq_econ, 
+                   names.arg = names(freq_econ),
+                   main = "Gráfico del nivel socioeconomico de los estudiantes", 
+                   col = colores, 
+                   ylim = c(0, max(freq_econ) + 100),
+                   xlab="Nivel socioeconomico",ylab="Frecuencia",
+                   cex.names = 0.6)
+
+# Añadir las frecuencias sobre las barras
+text(x = bar_econ, 
+     y = freq_econ+ 5, 
+     labels = freq_econ, 
+     pos = 3, 
+     cex = 0.8, 
+     col = "black")
+```
+
+De este gráfico,la mayoría de los estudiantes esta posicionado en el nivel socieconómico `Medio-Alto(NSE B)`.
+
+### Variables Cuantitativas
+
+*Gasto mensual en efectivo*
+
+```{r}
+hist_efec_T <- hist(bdf$GastoM_efectivo,           
+          col = "red",
+          main = "Histograma del gasto mensual usando efectivo",
+          xlab = "Monto (S/)",
+          ylab = "Frecuencia") 
+
+gastoDinero=na.omit(bdf$GastoM_efectivo)
+length(gastoDinero[gastoDinero<=2000])
+
+media_gasto_efect=mean(bdf$GastoM_efectivo,na.rm=TRUE)
+mediana_gasto_efect=median(bdf$GastoM_efectivo,na.rm=TRUE)
+
+#Para un mejor análisis vemos los datos menores a 2000.
+hist_efect <- hist(gastoDinero[gastoDinero<=2000],           
+          col = "olivedrab3",
+          main = "Histograma del gasto mensual usando efectivo",
+          xlab = "Monto (S/)",
+          ylab = "Frecuencia",
+         ylim = c(0,900))
+text(x = hist_efect$mids,               
+     y = hist_efect$counts,              
+     labels = hist_efect$counts,         
+     pos = 3,                   
+     cex = 0.7,                 
+     col = "black")
+# Agregar línea de la media
+abline(v = media_gasto_efect, col = "blue", lwd = 2, lty = 2)
+# Agregar línea de la mediana
+abline(v = mediana_gasto_efect, col = "red", lwd = 2, lty = 2)
+legend("topright",
+       legend = c(paste0("Media: ", round(media_gasto_efect, 2)),
+                  paste0("Mediana: ", round(mediana_gasto_efect, 2))),
+       col = c("blue", "red"),
+       lwd = 2,
+       lty = 2,
+       cex = 0.8,
+       box.lty = 0) 
+
+summary(bdf$GastoM_efectivo)
+# Imprime los resultados
+cat("Mediana:", median(gastoDinero), "\n")
+cat("Media:", mean(gastoDinero), "\n")
+cat("Maximo:", max(gastoDinero), "\n")
+cat("Minimo:", min(gastoDinero), "\n")
+cat("Rango:", max(gastoDinero)-min(gastoDinero), "\n")
+cat("Desviación estándar:", sd(gastoDinero), "\n")
+cat("Coeficiente de variacion:", sd(gastoDinero)/mean(gastoDinero), "\n")
+
+```
+
+Se observa que en promedio el gasto mensual usando dinero en efectivo de los estudiantes encuestados es de 286.3 soles;No obstante,este gasto oscila entre el rango de 0 a 10000 soles.Ademas,el 25% de los estudiantes gastan cantidades mayores a 300 soles en estos aplicativos ,la mitad gasta mas de 150 soles al mes y los datos se encuentran demasiados dispersos debido a su alto coeficiente de variación de 1.98.
+
+*Gasto mensual en billeteras virtuales*
+
+```{r}
+hist_virt_T <- hist(bdf$GastoM_B.digital,           
+          col = "red",
+          main = "Histograma del gasto mensual usando B.virtuales",
+          xlab = "Monto (S/)",
+          ylab = "Frecuencia") 
+
+gastovirtual=na.omit(bdf$GastoM_B.digital)
+length(gastovirtual[gastovirtual<=3000])
+
+media_gasto_virtual=mean(bdf$GastoM_B.digital,na.rm=TRUE)
+mediana_gasto_virtual=median(bdf$GastoM_B.digital,na.rm=TRUE)
+
+#Para un mejor análisis vemos los datos menores a 3000.
+hist_virt <- hist(gastovirtual[gastovirtual<=3000],           
+          col = "olivedrab3",
+          main = "Histograma del gasto mensual usando B.virtuales",
+          xlab = "Monto (S/)",
+          ylab = "Frecuencia",ylim = c(0,600)
+        )
+text(x = hist_virt$mids,               
+     y = hist_virt$counts,              
+     labels = hist_virt$counts,         
+     pos = 3,                   
+     cex = 0.7,                 
+     col = "black")
+# Agregar línea de la media
+abline(v = media_gasto_virtual, col = "blue", lwd = 2, lty = 2)
+# Agregar línea de la mediana
+abline(v = mediana_gasto_virtual, col = "red", lwd = 2, lty = 2)
+legend("topright",
+       legend = c(paste0("Media: ", round(media_gasto_virtual, 2)),
+                  paste0("Mediana: ", round(mediana_gasto_virtual, 2))),
+       col = c("blue", "red"),
+       lwd = 2,
+       lty = 2,
+       cex = 0.8,
+       box.lty = 0)
+
+
+summary(bdf$GastoM_B.digital)
+# Imprime los resultados
+cat("Mediana:", median(gastovirtual), "\n")
+cat("Media:", mean(gastovirtual), "\n")
+cat("Maximo:", max(gastovirtual), "\n")
+cat("Minimo:", min(gastovirtual), "\n")
+cat("Rango:", max(gastovirtual)-min(gastovirtual), "\n")
+cat("Desviación estándar:", sd(gastovirtual), "\n")
+cat("Coeficiente de variacion:", sd(gastovirtual)/mean(gastovirtual), "\n")
+
+```
+
+Se observa que en promedio el gasto mensual usando billeteras digitales(yape,plin,etc) de los estudiantes encuestados es de 518.46 soles;No obstante,este gasto oscila entre el rango de 0 a 50000 soles.Ademas,el 25% de los estudiantes gastan cantidades mayores a 500 soles en estos aplicativos ,la mitad gasta mas de 300 soles al mes y los datos se encuentran demasiados dispersos a su alto coeficiente de variación de 3.48.
+
+*Frecuencia de minado por dias*
+
+```{r}
+hist_dias=hist(bdf$frecuencia_minado_dias_semana,breaks = 7,main="Histograma de frecuencia de minado por semana",xlab="cant.dias",ylab ="frecuencia",col="blue",ylim = c(0,1000))
+text(x = hist_dias$mids,               
+     y = hist_dias$counts,              
+     labels = hist_dias$counts,         
+     pos = 3,                   
+     cex = 0.7,                 
+     col = "black")
+
+boxplot(bdf$frecuencia_minado_dias_semana,horizontal = T,main="GRAFICO DE CAJAS DE FRECUENDIA DE MINADO",col="green")
+
+bar_freq <- barplot(table(bdf$frecuencia_minado_dias_semana), 
+                   names.arg = names(table(bdf$frecuencia_minado_dias_semana)),
+                   main = "Gráfico de los dias minados por semana de los estudiantes", 
+                   col = "red", 
+                   ylim = c(0, max(table(bdf$frecuencia_minado_dias_semana)) + 100), 
+                   las = 0,               
+                   cex.names = 0.7)
+text(x = bar_freq, 
+     y = table(bdf$frecuencia_minado_dias_semana)+ 5, 
+     labels = table(bdf$frecuencia_minado_dias_semana), 
+     pos = 3, 
+     cex = 0.8, 
+     col = "black")
+
+summary(bdf$frecuencia_minado_dias_semana)
+
+```
+
+Se observa que en promedio la frecuencia de minado de criptomonedas de los estudiantes encuestados es de 1.126 dias por semana;No obstante,este gasto oscila entre el rango de 0 a 7 dias minados por semana .Ademas,el 25% de los estudiantes minan criptomonedas mas de 2 dias por semana ,al menos la mitad no mina criptomonedas.
+
+## Análisis de interacción
+
+### Objetivo 1
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+library(dplyr)
+
+# Crear variable binaria de minería
+bdf$ha_minado <- ifelse(bdf$frecuencia_minado_dias_semana > 0, "Sí", "No")
+bdf$ha_minado <- factor(bdf$ha_minado)
+
+
+# -------------------------------
+# Gráfico bivariado: Carrera vs Minado
+# -------------------------------
+bdf %>%
+  filter(!is.na(ha_minado), !is.na(carrera)) %>%
+  ggplot(aes(x = carrera, fill = ha_minado)) +
+  geom_bar(position = "fill") +  # usa proporciones
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minería por carrera",
+       x = "Carrera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Departamento vs Minado
+# -------------------------------
+bdf %>%
+  filter(!is.na(ha_minado), !is.na(departamento)) %>%
+  ggplot(aes(x = departamento, fill = ha_minado)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minería por departamento",
+       x = "Departamento", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Educación financiera vs Minado
+# -------------------------------
+bdf %>%
+  filter(!is.na(ha_minado), !is.na(educacion_financiera)) %>%
+  ggplot(aes(x = educacion_financiera, fill = ha_minado)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minería por nivel de educación financiera",
+       x = "Educación Financiera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal()
+
+
+
+```
+
+Del total de 1055 estudiantes analizados, 350 han realizado actividades de minería de criptomonedas, lo que representa el 33.2 % del total. Los tres gráficos de barras proporcionales permiten analizar esta conducta de minería segmentando por variables clave: tipo de carrera, departamento de procedencia y nivel de educación financiera. - En algunas carreras como Ingeniería o Informática, se observa una mayor proporción de minería. - A nivel geográfico, ciertos departamentos presentan una participación más activa, posiblemente relacionada con factores de acceso a tecnología o difusión entre pares.
+
+Finalmente, el nivel de educación financiera parece estar positivamente relacionado con la participación en minería, lo que puede interpretarse como una mejor comprensión de oportunidades digitales.
+
+Minado de criptomonedas gratis:
+
+```{r}
+# Asegurarse de que las columnas estén como factores con "Sí"/"No"
+bdf$minado_gratis <- ifelse(bdf$opcion2, "Sí", "No")
+bdf$minado_pi <- ifelse(bdf$opcion3, "Sí", "No")
+bdf$minado_pago <- ifelse(bdf$opcion4, "Sí", "No")
+bdf$minado_pi <- factor(bdf$minado_pi, levels = c("No", "Sí"))
+bdf$minado_gratis <- factor(bdf$minado_gratis, levels = c("No", "Sí"))
+bdf$minado_pago <- factor(bdf$minado_pago, levels = c("No", "Sí"))
+
+
+# -------------------------------
+# Gráfico bivariado: Carrera vs Minado gratis
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_gratis), !is.na(carrera)) %>%
+  ggplot(aes(x = carrera, fill = minado_gratis)) +
+  geom_bar(position = "fill") +  # usa proporciones
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado gratis de otras criptomonedas por carrera",
+       x = "Carrera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Departamento vs Minado gratis
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_gratis), !is.na(departamento)) %>%
+  ggplot(aes(x = departamento, fill = minado_gratis)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado gratis de otras criptomonedas por departamento",
+       x = "Departamento", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Educación financiera vs Minado gratis
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_gratis), !is.na(educacion_financiera)) %>%
+  ggplot(aes(x = educacion_financiera, fill = minado_gratis)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Minado gratis de otras criptomonedas por nivel de educación financiera",
+       x = "Educación Financiera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal()
+
+
+
+
+```
+
+Minado de criptomonedas de pago:
+
+```{r}
+# -------------------------------
+# Gráfico bivariado: Carrera vs Minado de pago
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pago), !is.na(carrera)) %>%
+  ggplot(aes(x = carrera, fill = minado_pago)) +
+  geom_bar(position = "fill") +  # usa proporciones
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado de cripto. de pago por carrera",
+       x = "Carrera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Departamento vs Minado de pago
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pago), !is.na(departamento)) %>%
+  ggplot(aes(x = departamento, fill = minado_pago)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado de cripto. de pago por departamento",
+       x = "Departamento", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Educación financiera vs Minado de pago
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pago), !is.na(educacion_financiera)) %>%
+  ggplot(aes(x = educacion_financiera, fill = minado_pago)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado de cripto. de pago por nivel de educación financiera",
+       x = "Educación Financiera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal()
+
+
+```
+
+Minado de PI NETWORK:
+
+```{r}
+# -------------------------------
+# Gráfico bivariado: Carrera vs Minado PI NETWORK
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pi), !is.na(carrera)) %>%
+  ggplot(aes(x = carrera, fill = minado_pi)) +
+  geom_bar(position = "fill") +  # usa proporciones
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado PI Network por carrera",
+       x = "Carrera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Departamento vs Minado PI NETWORK
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pi), !is.na(departamento)) %>%
+  ggplot(aes(x = departamento, fill = minado_pi)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado PI Network por departamento",
+       x = "Departamento", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# -------------------------------
+# Gráfico bivariado: Educación financiera vs Minado PI NETWORK
+# -------------------------------
+bdf %>%
+  filter(!is.na(minado_pi), !is.na(educacion_financiera)) %>%
+  ggplot(aes(x = educacion_financiera, fill = minado_pi)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Proporción de minado PI Network por nivel de educación financiera",
+       x = "Educación Financiera", y = "Porcentaje",
+       fill = "¿Ha minado?") +
+  theme_minimal()
+```
+
+### Objetivo 2
+
+```{r}
+install.packages("graphics")
+library(graphics)
+
+bdf$GastoM_efectivo <- as.character(bdf$GastoM_efectivo)
+
+bdf$GastoM_efectivo <- gsub("[^0-9\\.]", "", bdf$GastoM_efectivo)
+
+bdf$GastoM_efectivo <- as.numeric(bdf$GastoM_efectivo)
+
+
+#Agrupar
+bdf$gasto_efectivo_cat <- cut(bdf$GastoM_efectivo,
+                             breaks = quantile(bdf$GastoM_efectivo,
+                                               probs = c(0, 0.33, 0.66, 1),
+                                               na.rm = TRUE),
+                             labels = c("Bajo", "Medio", "Alto"),
+                             include.lowest = TRUE)
+
+df_mosaico <- na.omit(bdf[, c("gasto_efectivo_cat", "Nivel_socieconomico")])
+
+mosaicplot(table(df_mosaico$gasto_efectivo_cat, df_mosaico$Nivel_socieconomico),
+           color = c("#deebf7", "#9ecae1", "#3182bd"),
+           main = "Gasto mensual en efectivo vs Nivel Socieconómico",
+           xlab = "Gasto mensual (efectivo)",
+           ylab = "Nivel Socioeconómico",
+           las = 1,
+           dir = "h")
+```
+
+La mediana del gasto mensual en efectivo es de 150 soles, lo que significa que el 50% de los estudiantes gasta menos de ese valor al mes. Sin embargo, la media es de 286.34 soles, lo que indica la presencia de valores extremos altos que elevan el promedio. Esta asimetría se refleja también en un coeficiente de variación de 197.8 %, lo cual evidencia una alta dispersión en los datos. Por ello, la mediana es una mejor medida de tendencia central para estos datos.
+
+```{r}
+
+#LIMPIEZA
+bdf$GastoM_B.digital <- as.character(bdf$GastoM_B.digital)
+
+bdf$GastoM_B.digital <- gsub("[^0-9\\.]", "", bdf$GastoM_B.digital)
+
+bdf$GastoM_B.digital <- as.numeric(bdf$GastoM_B.digital)
+
+#Agrupar en rangos 
+bdf$gasto_digital_cat <- cut(bdf$GastoM_B.digital,
+                             breaks = quantile(bdf$GastoM_B.digital,
+                                               probs = c(0, 0.33, 0.66, 1),
+                                               na.rm = TRUE),
+                             labels = c("Bajo", "Medio", "Alto"),
+                             include.lowest = TRUE)
+
+df_mosaico <- na.omit(bdf[, c("gasto_digital_cat", "Nivel_socieconomico")])
+
+
+mosaicplot(table(df_mosaico$gasto_digital_cat, df_mosaico$Nivel_socieconomico),
+           color = c("#deebf7", "#9ecae1", "#3182bd"),
+           main = "Gasto mensual con billeteras digitales vs Nivel Socieconómico",
+           xlab = "Gasto mensual (Billeteras Digitales)",
+           ylab = "Nivel Socioeconómico",
+           las = 1,
+           dir = "h")
+```
+
+La distribución del gasto mensual usando billeteras digitales (Yape, Plin, etc.) es asimétrica. La mediana es de 300 soles. La media es más alta: 518.46 soles, lo que refleja la existencia de estudiantes que gastan considerablemente más. El coeficiente de variación es de 348.1 %, lo que sugiere una alta dispersión de los valores.
+
+```{r}
+
+# Recodificación
+bdf$minado_pi     <- ifelse(bdf$opcion2, "Sí", "No")
+bdf$minado_gratis <- ifelse(bdf$opcion3, "Sí", "No")
+
+bdf$minado_pi     <- factor(bdf$minado_pi, levels = c("No", "Sí"))
+bdf$minado_gratis <- factor(bdf$minado_gratis, levels = c("No", "Sí"))
+
+# Tabla
+df_mosaico <- na.omit(bdf[, c("minado_pi", "minado_gratis")])
+tabla_conteo <- table(df_mosaico$minado_pi, df_mosaico$minado_gratis)
+tabla_porcentaje <- round(prop.table(tabla_conteo) * 100, 1)
+
+# Paleta de colores (¡asegúrate que tenga 4 colores para los 4 bloques!)
+colores <- c("#deebf7", "#9ecae1", "#deebf7", "#9ecae1")
+
+# Crear un diseño de 3 áreas independientes con alturas ajustadas
+layout(matrix(1:3, ncol = 1), heights = c(0.8, 3.7, 1.9)) # Título (0.8), mosaico (4), leyenda (1.2)
+
+# Título (Gráfico independiente)
+par(mar = c(0, 0, 2, 0)) # Márgenes para el título
+plot.new() # Crear un gráfico vacío para el título
+title("Relación entre minado de Pi Network y otras criptomonedas gratuitas", cex.main = 1.4) # Reducir ligeramente el tamaño del título
+
+# Mosaico (Gráfico independiente)
+par(mar = c(4, 4, 0, 1)) # Ajustar márgenes para que el mosaico termine justo al final del eje X
+mosaicplot(tabla_conteo,
+           color = colores,
+           xlab = "Minó Pi Network",
+           ylab = "Minó otras criptos gratuitas",
+           las = 1,    
+           dir = "h",
+           main = "", # Eliminar título del mosaico
+           scale = 0.9) # Escala ajustada del mosaico
+
+# Leyenda (Gráfico independiente)
+par(mar = c(1, 1, 1, 1)) # Márgenes ajustados para la leyenda
+plot.new() # Crear un gráfico vacío para la leyenda
+legend("topleft", # Mover a la esquina superior izquierda
+       legend = c(
+         paste0("No minó Pi ni otras gratis: ", tabla_porcentaje["No", "No"], "%"),
+         paste0("No minó Pi pero sí otras gratis: ", tabla_porcentaje["No", "Sí"], "%"),
+         paste0("Minó Pi pero no otras gratis: ", tabla_porcentaje["Sí", "No"], "%"),
+         paste0("Minó Pi y otras gratis: ", tabla_porcentaje["Sí", "Sí"], "%")
+       ),
+       fill = colores,
+       title = "Categorías",
+       cex = 0.9, # Reducir ligeramente el tamaño del texto de la leyenda
+       bty = "o") # Agregar borde visible
+```
+
+Se observa la relación entre los estudiantes que han minado Pi Network y aquellos que han minado otras criptomonedas gratuitas. Del total de 1055 personas analizadas, 67 han minado tanto Pi Network como otras criptomonedas gratuitas, lo que representa el 6.4 % del total. Esto sugiere una posible asociación entre ambas conductas: los estudiantes que minan Pi Network también tienden a explorar otras opciones gratuitas de criptominería.
+
+# Conclusiones:
+
+El análisis estadístico realizado en el periodo 2025-1 en UTEC sobre el conocimiento, uso y percepción de la criptomoneda Pi Network entre estudiantes universitarios revela un panorama de baja adopción general, pero con nichos específicos de interés y oportunidades de mejora educativa. Los resultados evidencian tendencias importantes respecto a los perfiles de los estudiantes, sus hábitos financieros y la relación entre educación financiera y adopción tecnológica.
+
+En resumen, se observa que la mayoría de estudiantes no ha tenido experiencia con criptomonedas, aunque una tercera parte ha realizado actividades de minería digital. Predominan los estudiantes de ingeniería, procedentes de Lima y con un nivel de educación financiera promedio (nivel 3). Aquellos con mayor educación financiera tienden a explorar más activamente la minería de criptomonedas, especialmente a través de opciones gratuitas como Pi Network, que suele estar asociada con el interés por otras criptomonedas similares. Además, los estudiantes muestran un mayor uso de billeteras digitales frente al efectivo, el gasto mensual promedio en billeteras digitales es de 518.46 soles (mediana: 300 soles), superando al gasto en efectivo, que promedia 286.34 soles (mediana: 150 soles), aunque existe una amplia variabilidad en los montos gastados. Todo esto resalta la importancia de reforzar la educación financiera y tecnológica dentro del entorno universitario, para incentivar una adopción informada y segura de nuevas herramientas financieras digitales.
